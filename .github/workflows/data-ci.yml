@@ -1,26 +1,30 @@
-name: DD-CI-Integration
+name: CI Pipeline
 
 on:
   push:
     branches:
-      - master
-      - dev
+      - main
+  pull_request:
 
 jobs:
-  build-and-monitor:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Datadog CI Visibility
-        uses: DataDog/datadog-ci@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          datadog-api-key: ${{ secrets.DATADOG_API_KEY }}
-        env:
-          DD_SITE: datadoghq.eu
+          node-version: '14'
 
-      - name: Build and Test
+      - name: Install Datadog CLI
+        run: npm install -g @datadog/datadog-ci
+
+      - name: Run tests and report to Datadog
+        env:
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
         run: |
-          echo "Starting build..."
-          # Run your build or test commands here
+          # Run your tests here
+          npm test
