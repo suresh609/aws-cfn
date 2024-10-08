@@ -28,7 +28,7 @@ jobs:
             -d '{
                   "ddsource": "github_actions",
                   "ddtags": "branch:'${GIT_BRANCH}',pipeline_id:'${{ github.run_id }}'",
-                  "message": "Starting CI Pipeline for branch '${GIT_BRANCH}' at ${GITHUB_ACTIONS_URL}'"
+                  "message": "Starting CI Pipeline for branch"
                 }'
           
           # Add more log messages or log retrieval as necessary
