@@ -6,7 +6,6 @@ on:
       - main
       - dev
       - feature/*
-
 jobs:
   datadog-logs:
     runs-on: ubuntu-latest
