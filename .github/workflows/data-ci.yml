@@ -1,0 +1,25 @@
+name: DD-CI-Integration
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Datadog CI Visibility
+        uses: datadog/ci-visibility-github-action@v2
+        with:
+          datadog-api-key: ${{ secrets.DATADOG_API_KEY }}
+        env:
+          DD_SITE: datadoghq.eu
+
+      - name: Build and Test
+        run: |
+          echo "Starting build..."
+          # Run your build or test commands here
