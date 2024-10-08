@@ -1,4 +1,4 @@
-name: CI Pipeline with Datadog CI Visibility
+name: Datadog CI Visibility
 
 on:
   push:
