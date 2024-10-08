@@ -23,7 +23,7 @@ jobs:
           echo "Sending pipeline logs to Datadog..."
           
           # Example of logging a message
-          curl -X POST "https://api.datadoghq.com/api/v1/logs" \
+          curl -X POST "https://api.datadoghq.eu/api/v1/logs" \
             -H "DD-API-KEY: $DATADOG_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
