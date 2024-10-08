@@ -1,0 +1,52 @@
+name: CI Pipeline with Datadog CI Visibility
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - feature/*
+
+jobs:
+  datadog-logs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Up Datadog
+        env:
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          GIT_BRANCH: ${{ github.ref_name }}  # Current branch name
+          GITHUB_ACTIONS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          echo "Sending pipeline logs to Datadog..."
+          
+          # Example of logging a message
+          curl -X POST "https://api.datadoghq.com/api/v1/logs" \
+            -H "DD-API-KEY: $DATADOG_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+                  "ddsource": "github_actions",
+                  "ddtags": "branch:'${GIT_BRANCH}',pipeline_id:'${{ github.run_id }}'",
+                  "message": "Starting CI Pipeline for branch '${GIT_BRANCH}' at ${GITHUB_ACTIONS_URL}'"
+                }'
+          
+          # Add more log messages or log retrieval as necessary
+          
+      - name: Run Tests
+        run: |
+          echo "Running tests..."
+          # Add your test commands here
+
+      - name: Notify Datadog on Completion
+        run: |
+          echo "Pipeline completed."
+          curl -X POST "https://api.datadoghq.eu/api/v1/logs" \
+            -H "DD-API-KEY: $DATADOG_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+                  "ddsource": "github_actions",
+                  "ddtags": "branch:'${GIT_BRANCH}',pipeline_id:'${{ github.run_id }}'",
+                  "message": "Completed CI Pipeline for branch '${GIT_BRANCH}'"
+                }'
