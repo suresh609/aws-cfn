@@ -3,7 +3,7 @@ name: Send Custom Metrics to Datadog
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
   custom-metrics:
