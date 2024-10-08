@@ -1,30 +1,38 @@
-name: CI Pipeline
+name: Datadog
 
 on:
   push:
     branches:
       - dev
   pull_request:
+    branches:
+      - dev
 
 jobs:
-  build:
+  send-metrics-to-datadog:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+      - name: Check out the repository
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Set up Python environment
+        uses: actions/setup-python@v4
         with:
-          node-version: '14'
+          python-version: '3.x'
 
-      - name: Install Datadog CLI
-        run: npm install -g @datadog/datadog-ci
+      - name: Install Datadog Python library
+        run: |
+          python -m pip install --upgrade pip
+          pip install datadog
 
-      - name: Run tests and report to Datadog
+      - name: Send custom metric to Datadog
         env:
           DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
         run: |
-          # Run your tests here
-          npm test
+          python -c "
+          from datadog import initialize, api
+          options = {'api_key': '${DATADOG_API_KEY}'}
+          initialize(**options)
+          api.Metric.send(metric='github.actions.workflow.run', points=1, tags=['env:production', 'repo:${{ github.repository }}'])
+          "
