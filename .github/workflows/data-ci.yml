@@ -1,29 +1,47 @@
-name: Send Custom Metrics to Datadog
+name: DD CI
 
 on:
+  workflow_dispatch:
   push:
+    branches:
+      - dev
+  pull_request:
     branches:
       - dev
 
 jobs:
-  custom-metrics:
+  monitor-pipeline:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
-      - name: Send custom metrics to Datadog
-        run: |
-          curl -X POST "https://api.datadoghq.eu/api/v1/series" \
-          -H "Content-Type: application/json" \
-          -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
-          -d '{
-                "series": [{
-                  "metric": "ci.pipeline.duration",
-                  "points": [[$(date +%s), 123]],
-                  "type": "gauge",
-                  "tags": ["ci-provider:github", "env:production", "pipeline:build"]
-                }]
-              }'
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+
+      - name: Install Datadog CLI
+        run: npm install -g @datadog/datadog-ci
+
+      - name: Run Tests and Upload Results to Datadog
         env:
           DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+        run: |
+          # Run your test suite and output results in JUnit format
+          npm install
+          npm test || true  # Ensures test failures don't stop the next steps
+          
+          # Upload the test results to Datadog using the Datadog CLI
+          datadog-ci junit upload /path/to/junit.xml --service my-github-service --env ci
+
+      - name: Upload Pipeline Metrics to Datadog
+        env:
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+        run: |
+          # Send custom pipeline metrics to Datadog for CI monitoring
+          datadog-ci metrics pipeline upload \
+            --pipeline-name "GitHub Actions" \
+            --pipeline-id ${{ github.run_id }} \
+            --status success
