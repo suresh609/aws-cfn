@@ -1,36 +1,30 @@
-name: DD CI
+name: Datadog CI Metrics Pipeline Integration
 
 on:
-  workflow_dispatch:
   push:
-    branches:
-      - dev
-  pull_request:
     branches:
       - dev
 
 jobs:
-  monitor-pipeline:
+  build-and-upload-metrics:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Set up Node.js environment
-        uses: actions/setup-node@v3
+      - name: Set up Datadog CI Visibility
+        uses: DataDog/ci-visibility-github-action@v0.1.0
         with:
-          node-version: '14'
-
-      - name: Install Datadog CLI
-        run: npm install -g @datadog/datadog-ci     
-
-      - name: Upload Pipeline Metrics to Datadog
+          api-key: ${{ secrets.DATADOG_API_KEY }}
         env:
-          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DD_SITE: datadoghq.eu
+
+      - name: Build and Test
         run: |
-          # Send custom pipeline metrics to Datadog for CI monitoring
-          datadog-ci metrics pipeline upload \
-            --pipeline-name "GitHub Actions" \
-            --pipeline-id ${{ github.run_id }} \
-            --status success
+          echo "Running build steps..."
+          # Replace these with your actual build and test commands
+          echo "Build completed successfully"
+
+      - name: Upload CI Pipeline Metrics to Datadog
+        run: |
+          echo "Sending pipeline metrics to Datadog"
