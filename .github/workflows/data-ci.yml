@@ -1,4 +1,4 @@
-name: Datadog CI Metrics Pipeline Integration
+name: Datadog Log Upload via Curl
 
 on:
   push:
@@ -6,25 +6,21 @@ on:
       - dev
 
 jobs:
-  build-and-upload-metrics:
+  send-logs-to-datadog:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Datadog CI Visibility
-        uses: DataDog/ci-visibility-github-action@v0.1.0
-        with:
-          api-key: ${{ secrets.DATADOG_API_KEY }}
-        env:
-          DD_SITE: datadoghq.eu
-
-      - name: Build and Test
+      - name: Run Curl Command to Send Logs to Datadog
         run: |
-          echo "Running build steps..."
-          # Replace these with your actual build and test commands
-          echo "Build completed successfully"
-
-      - name: Upload CI Pipeline Metrics to Datadog
-        run: |
-          echo "Sending pipeline metrics to Datadog"
+          echo "Sending logs to Datadog via curl"
+           curl -X POST "https://api.datadoghq.eu/api/v1/integration/github" \
+          -H "Content-Type: application/json" \
+          -H "DD-API-KEY": ${{ secrets.DD_API_KEY }} \
+          -H "DD-APPLICATION-KEY": ${{ secrets.DD_APP_KEY }} \
+          -d '{
+             "account_name": ${{ github.repository_owner }},
+             "client_id": ${{ secrets.CLIENT_ID_GITHUB_APP }},
+             "client_secret": ${{ secrets.SECRET_GITHUB_APP }}
+          }'
