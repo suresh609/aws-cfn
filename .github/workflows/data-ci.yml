@@ -23,18 +23,7 @@ jobs:
           node-version: '14'
 
       - name: Install Datadog CLI
-        run: npm install -g @datadog/datadog-ci
-
-      - name: Run Tests and Upload Results to Datadog
-        env:
-          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
-        run: |
-          # Run your test suite and output results in JUnit format
-          npm install
-          npm test || true  # Ensures test failures don't stop the next steps
-          
-          # Upload the test results to Datadog using the Datadog CLI
-          datadog-ci junit upload /path/to/junit.xml --service my-github-service --env ci
+        run: npm install -g @datadog/datadog-ci     
 
       - name: Upload Pipeline Metrics to Datadog
         env:
